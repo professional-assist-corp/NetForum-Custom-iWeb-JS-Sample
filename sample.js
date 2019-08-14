@@ -95,6 +95,41 @@ var CustomJS = {
         TabID: null,
         LastAlertTime: null
     },
+    PhoneLinks: {
+        Init: function () {
+            $('body *:not(:empty)').filter(function (i) {
+                return this.nodeType == 1 && this.nodeName != 'SCRIPT' && this.nodeName != 'TEXTAREA' && this.nodeName != 'INPUT';
+            }).each(function (i, element) {
+                $(element).contents().filter(function () {
+                    return this.nodeType == 3 && this.nodeValue.trim() !== '';
+                }).each(function (i, node) {
+                    if ($(node).parent('a').length) return;
+                    var match = node.nodeValue.match(/(\(?[\d]{3}[\s\.\-\)]?[\d]{3}[\s\.\-]?[\d]{4}(?!\d))/g);
+                    if (match) {
+                        $.each(match, function (i, num) {
+                            var start = node.nodeValue.indexOf(num);
+                            var length = num.length;
+
+                            var parent = node.parentNode;
+                            var before = node.nodeValue.substr(0, start);
+                            var after = node.nodeValue.substr(start + length);
+
+                            parent.replaceChild(document.createTextNode(before), node);
+
+                            var a = document.createElement('a');
+                            a.href = 'tel:';
+                            a.href += num.replace(/[^\d]/g, '');
+                            a.appendChild(document.createTextNode(num));
+
+                            parent.appendChild(a);
+
+                            parent.appendChild(document.createTextNode(after));
+                        });
+                    }
+                });
+            });
+        }
+    },
     Styles: {
         Elements: {
             mainbg: {
